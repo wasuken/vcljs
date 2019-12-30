@@ -1,29 +1,30 @@
 (ns vcljs.cmds.init-test
   (:require [vcljs.cmds.init :as sut]
+            [vcljs.util :refer :all]
             [clojure.test :refer :all]))
 
-(defn remove-dir-all [path]
-  "danger"
-  (do
-    (map #(clojure.java.io/delete-file (.getPath %))
-         (filter #(.isFile %)
-                 (file-seq (clojure.java.io/file path))))
-    (map #(clojure.java.io/delete-file (.getPath %))
-         (reverse (file-seq (clojure.java.io/file path))))))
-
 (defn setup []
-  (remove-dir-all ".vcljs")
+  (remove-dir-all (read-config))
   )
 
 (defn cleanup []
-  ;; (remove-dir-all ".vcljs")
+  (remove-dir-all (read-config))
   )
 
 (deftest init-test
   (testing "subcommand init test"
     (setup)
-    (sut/init (-> (java.io.File. "") .getAbsolutePath))
-    (is true (.exists (java.io.File. ".vcljs")))
-    (is true (.exists (java.io.File. ".vcljs/config.json")))
-    (is true (.exists (java.io.File. ".vcljs/vcljs.sqlite")))
+    (let [cur-dir-path (str (-> (java.io.File. "") .getAbsolutePath) "/")]
+      (sut/init cur-dir-path)
+      (is (.exists (java.io.File. (str cur-dir-path ".vcljs"))))
+      (is (.exists (java.io.File. (str cur-dir-path ".vcljs/config.json"))))
+      (is (.exists (java.io.File. (str cur-dir-path ".vcljs/vcljs.sqlite")))))
     (cleanup)))
+
+;; (deftest when-config-dir-already-exists-test
+;;   (testing "subcommand init test(when config dir already exists test)"
+;;     (setup)
+;;     (sut/init (-> (java.io.File. "") .getAbsolutePath))
+;;     (sut/init (-> (java.io.File. "") .getAbsolutePath))
+;;     (is true true)
+;;     (cleanup)))

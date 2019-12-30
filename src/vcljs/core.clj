@@ -1,6 +1,8 @@
 (ns vcljs.core
   (:require [clj-sub-command.core :refer [parse-cmds]]
-            [vcljs.cmds.init :refer :all])
+            [vcljs.cmds.init :refer :all]
+            [vcljs.util :refer :all]
+            [vcljs.cmds.add :refer :all])
   (:gen-class))
 
 (def options
@@ -22,4 +24,7 @@
         cmd (:command parsed)
         current-path (str (-> (java.io.File. "") .getAbsolutePath) "/")]
     (case cmd
-      :init (init current-path))))
+      :init (init current-path)
+      :add (add (read-config) (:arguments parsed))
+      ;; :add-cancel (add current-path)
+      )))

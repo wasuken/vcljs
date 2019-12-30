@@ -7,6 +7,7 @@
                  [clj-sub-command "0.5.1"]
                  [org.clojure/java.jdbc "0.7.11"]
                  [org.xerial/sqlite-jdbc "3.30.1"]
-                 [org.clojure/data.json "0.2.7"]]
+                 [org.clojure/data.json "0.2.7"]
+                 [clj-glob "1.0.0"]]
   :repl-options {:init-ns vcljs.core}
   :main vcljs.core)
