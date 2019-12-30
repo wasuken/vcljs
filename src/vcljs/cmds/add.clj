@@ -1,6 +1,7 @@
 (ns vcljs.cmds.add
   (:require [clojure.java.jdbc :as j]
             [vcljs.db :refer :all]
+            [vcljs.util :refer :all]
             [org.satta.glob :refer [glob]]))
 
 (defn insert-node-list [path-list db]
@@ -23,13 +24,15 @@
         files (remove #(.isDirectory
                         (clojure.java.io/file (:filepath %))) filtered-nodes)]
     (j/insert-multi! db
-                     :add_dirs
+                     :dirs
                      (map #(hash-map :node_id (:id %))
                           dirs))
     (j/insert-multi! db
-                     :add_files
-                     (map #(hash-map :node_id (:id %),
-                                     :content (slurp (:filepath %)))
+                     :files
+                     (map #(let [content (slurp (:filepath %))]
+                             (hash-map :node_id (:id %),
+                                       :content content
+                                       :content_hash (sha1-str content)))
                           files))))
 
 (defn insert-add-from-pattern [patterns db]

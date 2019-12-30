@@ -17,3 +17,13 @@
                         (file-seq (clojure.java.io/file path)))))
     (doall (map #(clojure.java.io/delete-file %)
                 (reverse (file-seq (clojure.java.io/file path)))))))
+
+;;; original => https://gist.github.com/hozumi/1472865
+(defn sha1-str [s]
+  (->> (-> "sha1"
+           java.security.MessageDigest/getInstance
+           (.digest (.getBytes s)))
+       (map #(.substring
+              (Integer/toString
+               (+ (bit-and % 0xff) 0x100) 16) 1))
+       (apply str)))

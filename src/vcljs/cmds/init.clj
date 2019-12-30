@@ -5,18 +5,19 @@
 
 (def sql-map {:create {:nodes (str "nodes(id integer primary key,"
                                    "created_at DATETIME DEFAULT CURRENT_TIMESTAMP,"
-                                   "filepath text);")
-                       :add-files "add_files(node_id integer primary key,content text);"
-                       :add-dirs "add_dirs(node_id integer primary key);"
-                       :commit-files "commit_files(node_id integer primary key,content text);"
-                       :commit-dirs "commit_dirs(node_id integer primary key);"
-                       :versions (str "versions(id integer priamry key,"
+                                   "filepath text, status integer not null default 0);")
+                       :files "files(node_id integer primary key,content text not null, content_hash text not null);"
+                       :dirs "dirs(node_id integer primary key);"
+                       :status (str "status(id integer primary key, status_name text not null);"
+                                    "insert into status(id, status_name) values(0, 'add');"
+                                    "insert into status(id, status_name) values(1, 'commit');")
+                       :commits (str "commits(id text priamry key,"
                                       "created_at DATETIME DEFAULT CURRENT_TIMESTAMP,"
                                       "commit_message text,"
                                       "branch_id integer);")
                        :branches "branches(id integer primary key, name text);"
-                       :version-nodes (str "version_nodes(version_id integer, node_id integer,"
-                                           "primary key(version_id, node_id));")
+                       :version-nodes (str "commit_nodes(commit_id integer, node_id integer,"
+                                           "primary key(commit_id, node_id));")
                        }})
 
 (defn create-database [path]

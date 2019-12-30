@@ -24,8 +24,8 @@
           db (sqlite-db sqlite-path)]
       (sut/add (read-config) files)
       (is (= (count (j/query db ["select * from nodes"])) 5))
-      (is (= (count (j/query db ["select * from add_files"])) 4))
-      (is (= (count (j/query db ["select * from add_dirs"])) 1))
+      (is (= (count (j/query db ["select * from files"])) 4))
+      (is (= (count (j/query db ["select * from dirs"])) 1))
       (doseq [path (map #(:filepath %)
                         (j/query db ["select * from nodes"]))]
         (is (.exists (clojure.java.io/file path)))))
@@ -39,8 +39,8 @@
           db (sqlite-db sqlite-path)]
       (sut/add (read-config) patterns)
       (is (= (count (j/query db ["select * from nodes"])) 5))
-      (is (= (count (j/query db ["select * from add_files"])) 4))
-      (is (= (count (j/query db ["select * from add_dirs"])) 1))
+      (is (= (count (j/query db ["select * from files"])) 4))
+      (is (= (count (j/query db ["select * from dirs"])) 1))
       (doseq [path (map #(:filepath %)
                         (j/query db ["select * from nodes"]))]
         (is (.exists (clojure.java.io/file path)))))
