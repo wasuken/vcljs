@@ -45,3 +45,8 @@
                         (j/query db ["select * from nodes"]))]
         (is (.exists (clojure.java.io/file path)))))
     (cleanup)))
+
+(deftest add-cancel-test
+  (testing "add-cancel command test"
+    (setup)
+    (cleanup)))
