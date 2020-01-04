@@ -9,9 +9,8 @@
   (.getAbsolutePath (clojure.java.io/file str)))
 
 (defn insert-node-list [path-list db]
-  (let [already-added (j/query db [(str "select filepath, content_hash from nodes"
-                                        " where status_id = 0")])
-        filtered-nodes (remove (fn [x] (nil? (some (fn [y] (= x (:filepath y))) already-added)))
+  (let [already-added (j/query db [(str "select filepath, content_hash from nodes")])
+        filtered-nodes (remove (fn [x] (some (fn [y] (= x (:filepath y))) already-added))
                                (remove #(.isDirectory (clojure.java.io/file %)) path-list))]
     (j/insert-multi! db :nodes
                      (map #(let [content (slurp %)]
@@ -34,7 +33,9 @@
 (defn add [config-dir-path arguments]
   (let [db (sqlite-db (str config-dir-path "vcljs.sqlite"))]
     (if (and (= (count arguments) 1) (= (first arguments) "."))
-      (insert-node-list (drop 1 (file-seq (clojure.java.io/file "./"))) db)
+      (insert-node-list (map #(.getAbsolutePath %)
+                             (drop 1 (file-seq (clojure.java.io/file "./"))))
+                        db)
       (do
         (insert-node-list (map path-str->fullpath
                                (filter #(.exists (clojure.java.io/file %)) arguments)) db)

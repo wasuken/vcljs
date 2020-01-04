@@ -12,7 +12,7 @@
                                     "insert into status(id, status_name) values(1, 'commit');")
                        :commits (str "commits(id text priamry key,"
                                      "created_at DATETIME DEFAULT CURRENT_TIMESTAMP,"
-                                     "commit_message text not null,"
+                                     "message text not null,"
                                      "branch_id integer not null default 0);")
                        :branches (str "branches(id integer primary key, name text not null);"
                                       "insert into branches(id, name) values(0, 'default');")

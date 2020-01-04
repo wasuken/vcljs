@@ -11,7 +11,7 @@
   (remove-dir-all (read-config))
   )
 
-(deftest init-test
+(deftest init-current-test
   (testing "subcommand init test"
     (setup)
     (let [cur-dir-path (str (-> (java.io.File. "") .getAbsolutePath) "/")]
