@@ -4,11 +4,11 @@
             [vcljs.util :refer :all]
             [vcljs.db :refer :all]
             [clojure.test :refer :all]
-            [clojure.java.jdbc :as j]))
+            [clojure.java.jdbc :as j]
+            [org.satta.glob :refer [glob]]))
 
 (defn setup []
   (remove-dir-all (read-config))
-  (clojure.java.shell/sh "cd" "./testdir")
   (init (str (-> (java.io.File. "") .getAbsolutePath) "/"))
   )
 
@@ -35,7 +35,14 @@
       (sut/add (read-config) patterns))
     (cleanup)))
 
-;; (deftest add-cancel-test
-;;   (testing "add-cancel command test"
-;;     (setup)
-;;     (cleanup)))
+(deftest add-cancel-test
+  (testing "add-cancel command test"
+    (setup)
+    (let [files ["testdir/a.txt" "testdir/b.txt"]
+          sqlite-path (str (read-config) "vcljs.sqlite")
+          db (sqlite-db sqlite-path)]
+      (sut/add (read-config) files)
+      (sut/add-cancel (read-config) "testdir/a.txt")
+      (is (map #(:filepath %) (j/query db ["select filepath from nodes"]))
+          ["testdir/b.txt"]))
+    (cleanup)))

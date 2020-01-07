@@ -43,5 +43,10 @@
 
 (defn add-cancel [config-dir-path arguments]
   (try
-    (let [db (sqlite-db (str config-dir-path "vcljs.sqlite"))])
+    (let [db (sqlite-db (str config-dir-path "vcljs.sqlite"))]
+      (doseq [filepath (filter #(.exists (clojure.java.io/file %)) arguments)]
+        (j/delete! db :nodes ["status_id = 0 and filepath = ?" filepath]))
+      (doseq [patterns (remove #(.exists (clojure.java.io/file %)) arguments)]
+        (doseq [filepath (mapcat #(map (fn [x] (.getAbsolutePath x)) (glob %)) patterns)]
+          (j/delete! db :nodes ["status_id = 0 and filepath = ?" filepath]))))
     (catch Exception e (println "caught exception: " (.getMessage e)))))

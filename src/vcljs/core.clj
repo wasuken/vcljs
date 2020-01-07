@@ -54,5 +54,7 @@
                           (nil? (first ags)))
                 (println "config dir not found or not msg.")
                 (commit (read-config) (first ags)))
-      ;; :add-cancel (add current-path)
+      :add-cancel (if-not (.exists (clojure.java.io/file (read-config)))
+                    (println "config dir not found.")
+                    (add-cancel (read-config) ags))
       )))
