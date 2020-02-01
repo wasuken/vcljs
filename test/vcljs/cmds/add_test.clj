@@ -10,10 +10,16 @@
 (defn setup []
   (remove-dir-all (read-config))
   (init (str (-> (java.io.File. "") .getAbsolutePath) "/"))
+  (let [files ["./testdir/a.txt" "./testdir/b.txt" "./testdir/c.txt" "./testdir/d.txt"
+               "./testdir/hoge"]]
+    (clojure.java.io/make-parents "./testdir/a.txt")
+    (doseq [file files]
+      (spit file "")))
   )
 
 (defn cleanup []
   (remove-dir-all (read-config))
+  (remove-dir-all "./testdir")
   )
 
 (deftest base-add-test

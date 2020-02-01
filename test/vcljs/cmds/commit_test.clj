@@ -17,6 +17,7 @@
 
 (defn setup []
   (remove-dir-all (read-config))
+  (clojure.java.io/make-parents "./testdir/a.txt")
   (init (str (-> (java.io.File. "") .getAbsolutePath) "/"))
   (doseq [file ["./testdir/a.txt" "./testdir/b.txt" "./testdir/c.txt" "./testdir/d.txt"]]
     (spit file ""))
@@ -24,7 +25,7 @@
 
 (defn cleanup []
   (remove-dir-all (read-config))
-  )
+  (remove-dir-all "./testdir"))
 
 (deftest base-commit-test
   (testing "commit test"
