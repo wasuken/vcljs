@@ -16,7 +16,7 @@
                                      "branch_id integer not null default 0);")
                        :branches (str "branches(id integer primary key, name text not null);"
                                       "insert into branches(id, name) values(0, 'default');")
-                       :commit-nodes (str "commit_nodes(commit_id integer, node_id integer,"
+                       :commit-nodes (str "commit_nodes(commit_id text, node_id integer,"
                                           "primary key(commit_id, node_id));")
                        }})
 
