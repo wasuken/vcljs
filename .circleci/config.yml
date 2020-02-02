@@ -32,7 +32,7 @@ jobs:
       - run: lein test
       # push master
       - run: git config user.email "wevorence@gmail.com"
-      - run: git config user.name "wasuken"
+      - run: git config user.name "circleci"
       - run: git checkout master
       - run: git merge dev
       - run: git push origin master
