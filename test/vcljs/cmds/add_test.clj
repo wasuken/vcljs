@@ -44,11 +44,16 @@
 (deftest add-cancel-test
   (testing "add-cancel command test"
     (setup)
-    (let [files ["testdir/a.txt" "testdir/b.txt"]
+    (let [files (map #(.getAbsolutePath (clojure.java.io/file %)) ["testdir/a.txt" "testdir/b.txt"])
           sqlite-path (str (read-config) "vcljs.sqlite")
           db (sqlite-db sqlite-path)]
       (sut/add (read-config) files)
-      (sut/add-cancel (read-config) "testdir/a.txt")
-      (is (map #(:filepath %) (j/query db ["select filepath from nodes"]))
-          ["testdir/b.txt"]))
+      (sut/add-cancel (read-config) [(first files)])
+      (is (= (count (map #(:filepath %)
+                         (j/query db ["select filepath from nodes"])))
+             1))
+      (doseq [actual (map #(:filepath %) (j/query db ["select filepath from nodes"]))
+              expected [(second files)]]
+        (is (= actual
+               expected))))
     (cleanup)))

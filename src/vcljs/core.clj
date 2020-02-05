@@ -4,6 +4,7 @@
             [vcljs.cmds.status :refer :all]
             [vcljs.cmds.commit :refer :all]
             [vcljs.util :refer :all]
+            [vcljs.cmds.reset :refer :all]
             [vcljs.cmds.add :refer :all])
   (:gen-class))
 
@@ -47,6 +48,9 @@
       :add (if-not (.exists (clojure.java.io/file (read-config)))
              (println "config dir not found.")
              (add (read-config) ags))
+      :reset (if-not (.exists (clojure.java.io/file (read-config)))
+               (println "config dir not found.")
+               (reset (read-config)))
       :status (if-not (.exists (clojure.java.io/file (read-config)))
                 (println "config dir not found.")
                 (status (read-config)))
