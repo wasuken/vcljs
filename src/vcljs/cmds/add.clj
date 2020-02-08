@@ -10,21 +10,16 @@
 
 (defn insert-node-list [path-list db]
   (let [already-added (j/query db [(str "select filepath, content_hash from nodes")])
-        filtered-nodes (remove (fn [x] (some (fn [y] (= x (:filepath y))) already-added))
+        filtered-nodes (remove (fn [x] (some #(= (sha1-str (str x (slurp x))) %)
+                                             (map #(:content_hash %)
+                                                   already-added)))
                                (remove #(.isDirectory (clojure.java.io/file %)) path-list))]
     (j/insert-multi! db :nodes
                      (map #(let [content (slurp %)]
                              (hash-map :content content,
                                        :filepath %,
                                        :content_hash (sha1-str (str % content))))
-                          filtered-nodes))
-    (doseq [mod-rec (added<->adding->modified-recs path-list db)]
-      (let [content (slurp (:filepath mod-rec))]
-        (j/update! db :nodes
-                   {:content content,
-                    :content_hash (sha1-str (str (:filepath mod-rec)
-                                                 content))}
-                   ["id = ?" (:id mod-rec)])))))
+                          filtered-nodes))))
 
 (defn insert-add-from-pattern [patterns db]
   (insert-node-list

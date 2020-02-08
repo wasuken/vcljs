@@ -1,6 +1,7 @@
 (ns vcljs.cmds.add-test
   (:require [vcljs.cmds.add :as sut]
             [vcljs.cmds.init :refer [init]]
+            [vcljs.cmds.commit :refer :all]
             [vcljs.util :refer :all]
             [vcljs.db :refer :all]
             [clojure.test :refer :all]
@@ -56,4 +57,19 @@
               expected [(second files)]]
         (is (= actual
                expected))))
+    (cleanup)))
+
+(deftest add->commit->add-test
+  (testing "add->commit->add"
+    (setup)
+    (let [files (map #(.getAbsolutePath (clojure.java.io/file %)) ["testdir/a.txt" "testdir/b.txt"])
+          sqlite-path (str (read-config) "vcljs.sqlite")
+          db (sqlite-db sqlite-path)]
+      (sut/add (read-config) files)
+      (commit (read-config) "test")
+      (doseq [file files]
+        (spit file "hogehogehogoehgohgoeh"))
+      (sut/add (read-config) files)
+      (is (= (count files)
+             (count (j/query db ["select * from nodes where status_id = 0"])))))
     (cleanup)))

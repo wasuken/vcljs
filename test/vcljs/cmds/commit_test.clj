@@ -27,44 +27,59 @@
   (remove-dir-all (read-config))
   (remove-dir-all "./testdir"))
 
-(deftest base-commit-test
-  (testing "commit test"
-    (setup)
-    (let [files ["./testdir/a.txt" "./testdir/b.txt" "./testdir/c.txt" "./testdir/d.txt"]
-          sqlite-path (str (read-config) "vcljs.sqlite")
-          db (sqlite-db sqlite-path)]
-      (add (read-config) files)
-      (sut/commit (read-config) "test")
-      (let [added-nodes (j/query db ["select * from nodes where status_id = 0;"])
-            commited-nodes-in-nodes (j/query db ["select * from nodes where status_id = 1 order by created_at;"])
-            commited-nodes-in-commited-nodes (j/query db [commited-nodes-in-commited-nodes-sql])]
-        (is (zero? (count added-nodes)))
-        (is (= commited-nodes-in-commited-nodes commited-nodes-in-nodes))))
-    (cleanup)))
+;; (deftest base-commit-test
+;;   (testing "commit test"
+;;     (setup)
+;;     (let [files ["./testdir/a.txt" "./testdir/b.txt" "./testdir/c.txt" "./testdir/d.txt"]
+;;           sqlite-path (str (read-config) "vcljs.sqlite")
+;;           db (sqlite-db sqlite-path)]
+;;       (add (read-config) files)
+;;       (sut/commit (read-config) "test")
+;;       (let [added-nodes (j/query db ["select * from nodes where status_id = 0;"])
+;;             commited-nodes-in-nodes (j/query db ["select * from nodes where status_id = 1 order by created_at;"])
+;;             commited-nodes-in-commited-nodes (j/query db [commited-nodes-in-commited-nodes-sql])]
+;;         (is (zero? (count added-nodes)))
+;;         (is (= commited-nodes-in-commited-nodes commited-nodes-in-nodes))))
+;;     (cleanup)))
 
-(deftest multi-commit-test
-  (testing "multi commit test"
+(deftest move-commit-test
+  (testing "move commit test"
     (setup)
     (let [files ["./testdir/a.txt" "./testdir/b.txt" "./testdir/c.txt" "./testdir/d.txt"]
           sqlite-path (str (read-config) "vcljs.sqlite")
           db (sqlite-db sqlite-path)]
+      ;; 1
+      (doseq [file files]
+        (spit file "hoge"))
       (add (read-config) files)
-      (let [added-nodes (j/query db ["select * from nodes where status_id = 0;"])
-            commited-nodes-in-nodes (j/query db ["select * from nodes where status_id = 1 order by created_at;"])
-            commited-nodes-in-commited-nodes (j/query db
-                                                      [commited-nodes-in-commited-nodes-sql])]
-        (sut/commit (read-config) "test")
+      (sut/commit (read-config) "test1")
+      ;; 2
+      (doseq [file files]
+        (spit file "fuga"))
+      (add (read-config) files)
+      (sut/commit (read-config) "test2")
+      ;; 3
+      (doseq [file files]
+        (spit file "poyo"))
+      (add (read-config) files)
+      (sut/commit (read-config) "test3")
+      (let [commit-id-list (map #(:id %)
+                                (j/query db ["select id, created_at from commits order by created_at"]))]
+        ;; move 1 test
+        (sut/move-commit (read-config) (nth commit-id-list 0))
         (doseq [file files]
-          (spit file file))
-        (add (read-config) files)
-        (sut/commit (read-config) "test2")
-        (let [added-nodes2 (j/query db ["select * from nodes where status_id = 0;"])
-              commited-nodes-in-nodes2 (j/query db ["select * from nodes where status_id = 1 order by created_at;"])
-              commited-nodes-in-commited-nodes2 (j/query db [commited-nodes-in-commited-nodes-sql])]
-          (is (> (count commited-nodes-in-nodes2) 0))
-          (is (> (count commited-nodes-in-commited-nodes2) 0))
-          (is (= commited-nodes-in-commited-nodes2 commited-nodes-in-nodes2))
-          (is (not (= commited-nodes-in-nodes commited-nodes-in-nodes2)))
-          (is (not (= commited-nodes-in-commited-nodes commited-nodes-in-commited-nodes2)))
-          (is (zero? (count added-nodes2))))))
-    (cleanup)))
+          (is (= (slurp file)
+                 "hoge")))
+        ;; move 2 test
+        (sut/move-commit (read-config) (nth commit-id-list 1))
+        (doseq [file files]
+          (is (= (slurp file)
+                 "fuga")))
+        ;; move 3 test
+        (sut/move-commit (read-config) (nth commit-id-list 2))
+        (doseq [file files]
+          (is (= (slurp file)
+                 "poyo")))
+        )
+      (cleanup)
+      )))

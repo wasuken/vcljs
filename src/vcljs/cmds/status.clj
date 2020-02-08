@@ -22,7 +22,7 @@
                      latest-commited-recs)
               added-recs))))
 
-(defn added<->adding->modified-recs [adding-path db]
+(defn added<->adding->modified-recs [adding-path-list db]
   (let [added-recs (j/query db
                             [(str "select * from nodes"
                                   " where status_id = 0")])]
@@ -30,7 +30,8 @@
       []
       (filter #(some (fn [x] (and (= x (:filepath %))
                                   (not (= (sha1-str (str x (slurp x)))
-                                          (:content_hash %))))) adding-path)
+                                          (:content_hash %)))))
+                     adding-path-list)
               added-recs))))
 
 (defn diff-print [result-list]

@@ -17,6 +17,6 @@
     (when-not (zero? (count latest-commited-recs))
       (doseq [rec latest-commited-recs]
         (let [now-file-contents (slurp (:filepath rec))]
-          (when-not (= (sha1-str now-file-contents)
+          (when-not (= (sha1-str (str (:filepath now-file-contents)))
                        (:contents_hash rec))
             (spit (:filepath rec) (:content rec))))))))
